@@ -5,7 +5,7 @@ function App() {
     <div>
       <h1>¡Universidad Católica de Pereira !</h1>
       <p>Listado de integrantes - Proceso de Desarrollo de Software I</p>
-      <p>profe: Andrés Mauricio Martinez</p>
+      <p>profe: Andrés Mauricio Martinez Hincapie</p>
     </div>
   );
 }
