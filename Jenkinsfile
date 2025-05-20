@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'Node_24'  // Nombre definido en Global Tool Configuration
+    }
+
     stages {
         // Etapa 1: Checkout del código desde GitHub
         stage('Checkout') {
