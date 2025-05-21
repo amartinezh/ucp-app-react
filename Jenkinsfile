@@ -24,13 +24,13 @@ pipeline {
         // Etapa 3: Ejecutar pruebas unitarias
         stage('Unit Tests') {
             steps {
-                sh 'npm test -- --watchAll=false' // Ejecuta pruebas sin modo interactivo
+                sh 'npm test -- --watchAll=false --silent > test-output.txt || true' // Ejecuta pruebas sin modo interactivo
+                // Muestra el reporte simple en la consola
+                sh 'cat test-output.txt'
             }
             post {
                 always {
                     archiveArtifacts artifacts: 'test-output.txt', allowEmptyArchive: true
-                    // Muestra el reporte simple en la consola
-                    sh 'cat test-output.txt'
                 }
             }
         }
