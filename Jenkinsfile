@@ -22,27 +22,33 @@ pipeline {
         }
 
         // Etapa 3: Ejecutar pruebas unitarias
-        stage('Unit Tests') {
+        stage('Pruebas Unitarias') {
             steps {
-                sh 'npm test -- --watchAll=false --silent > test-output.txt || true' // Ejecuta pruebas sin modo interactivo
-                // Muestra el reporte simple en la consola
-                sh 'cat test-output.txt'
+                sh 'npm test -- --watchAll=false --ci --reporters=default --reporters=jest-junit' // Genera reporte JUnit
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'test-output.txt', allowEmptyArchive: true
+                    junit 'junit.xml' // Publica reporte en Jenkins
+                    archiveArtifacts artifacts: 'junit.xml', allowEmptyArchive: true
                 }
             }
         }
+
     }
 
     // Post-actions (opcional)
     post {
-        success {
-            echo '¡Pipeline ejecutado con éxito!'
-        }
-        failure {
-            echo 'Pipeline fallido. Revisar logs.'
+        always {
+            emailext (
+                subject: "Pipeline ${currentBuild.result}: ucp-app-react #${env.BUILD_NUMBER}",
+                body: """
+                    Estado: ${currentBuild.result}
+                    URL Build: ${env.BUILD_URL}
+                    Detalles de Pruebas: ${env.BUILD_URL}testReport/
+                """,
+                to: 'tu-email@example.com' // Reemplaza con tu email
+            )
         }
     }
+
 }
