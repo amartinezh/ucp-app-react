@@ -30,13 +30,7 @@ pipeline {
             }
             post {
                 always {
-                    // Archiva el reporte de texto (opcional)
                     archiveArtifacts artifacts: 'test-output.txt', allowEmptyArchive: true
-                    // Guarda el resultado como variable para notificaciones
-                    script {
-                        testResult = readFile('test-output.txt')
-                        currentBuild.description = "Tests: ${testResult.contains('PASS') ? '✅ PASS' : '❌ FAIL'}"
-                    }
                 }
             }
         }
