@@ -25,10 +25,18 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh 'npm test -- --watchAll=false' // Ejecuta pruebas sin modo interactivo
+                // Muestra el reporte simple en la consola
+                sh 'cat test-output.txt'
             }
             post {
                 always {
-                    junit 'junit.xml' // Reporte de pruebas (si usas Jest con salida JUnit)
+                    // Archiva el reporte de texto (opcional)
+                    archiveArtifacts artifacts: 'test-output.txt', allowEmptyArchive: true
+                    // Guarda el resultado como variable para notificaciones
+                    script {
+                        testResult = readFile('test-output.txt')
+                        currentBuild.description = "Tests: ${testResult.contains('PASS') ? '✅ PASS' : '❌ FAIL'}"
+                    }
                 }
             }
         }
