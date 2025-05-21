@@ -36,7 +36,6 @@ pipeline {
 
     }
 
-    // Post-actions (opcional)
     post {
         always {
             emailext (
