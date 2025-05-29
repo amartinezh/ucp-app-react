@@ -84,7 +84,7 @@ pipeline {
                 script {
                     // Verifica que el directorio build existe
                     sh 'ls -la build/ || echo "Directory build/ does not exist"'
-                    
+            
                     // Crea prod y copia con verificación
                     sh '''
                         mkdir -p prod
@@ -92,7 +92,9 @@ pipeline {
                         ls -la build/
                         echo "Copying files..."
                         cp -r build/* prod/ || echo "Copy failed"
-                        echo "Contents o
+                        echo "Contents of prod/:"
+                        ls -la prod/
+                    '''
                 }
             }
         }
