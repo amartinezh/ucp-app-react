@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        nodejs 'Node_24'  // Configurado en Global Tools
+        nodejs 'Node_24'
     }
     environment {
         SONAR_PROJECT_KEY = 'ucp-app-react'
@@ -9,66 +9,68 @@ pipeline {
         SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
     }
     stages {
-        // Etapa 1: Checkout
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/amartinezh/ucp-app-react.git'
             }
         }
 
-        // Nueva etapa: Análisis de SonarQube
+        stage('Build and Test') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+                sh 'npm run test:coverage'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                        -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                        -Dsonar.sources=src \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_AUTH_TOKEN} \
-                        -Dsonar.javascript.node=${NODEJS_HOME}/bin/node \
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                    '''
+                script {
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+                            -Dsonar.sources=src \
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.login=${SONAR_AUTH_TOKEN} \
+                            -Dsonar.javascript.node=${tool 'Node_24'}/bin/node \
+                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                        """
+                    }
+                    
+                    // Esperar después de withSonarQubeEnv pero en el mismo stage
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Quality Gate failed: ${qg.status}"
+                    }
                 }
             }
         }
 
-        // Etapa 2: Build
-        stage('Build') {
-            steps {
-                sh 'npm install'
-                sh 'npm run build'
-                sh 'npm run test:coverage' // Asegúrate de que tu package.json tenga este script
-            }
-        }
-
-        // Etapa 3: Pruebas Paralelizadas
-        stage('Pruebas en Paralelo') {
+        stage('Parallel Tests') {
             parallel {
-                // Pruebas en Chrome
-                stage('Pruebas Chrome') {
+                stage('Chrome Tests') {
                     steps {
                         script {
                             try {
                                 sh 'npm test -- --browser=chrome --watchAll=false --ci --reporters=jest-junit'
                                 junit 'junit-chrome.xml'
                             } catch (err) {
-                                echo "Pruebas en Chrome fallaron: ${err}"
+                                echo "Chrome tests failed: ${err}"
                                 currentBuild.result = 'UNSTABLE'
                             }
                         }
                     }
                 }
-                // Pruebas en Firefox
-                stage('Pruebas Firefox') {
+                stage('Firefox Tests') {
                     steps {
                         script {
                             try {
                                 sh 'npm test -- --browser=firefox --watchAll=false --ci --reporters=jest-junit'
                                 junit 'junit-firefox.xml'
                             } catch (err) {
-                                echo "Pruebas en Firefox fallaron: ${err}"
+                                echo "Firefox tests failed: ${err}"
                                 currentBuild.result = 'UNSTABLE'
                             }
                         }
@@ -77,23 +79,20 @@ pipeline {
             }
         }
 
-
-        // Etapa 4: Deploy Simulado
-        stage('Deploy a Producción (Simulado)') {
+        stage('Deploy (Simulated)') {
             steps {
                 script {
-                    // Crear carpeta "prod" y copiar build
                     sh 'mkdir -p prod && cp -r build/* prod/'
-                    echo "¡Deploy simulado exitoso! Archivos copiados a /prod"
+                    echo "Simulated deploy successful! Files copied to /prod"
                 }
             }
         }
     }
     post {
         always {
-            // Publicar reportes HTML (opcional)
+            // Publicar HTML primero
             publishHTML target: [
-                allowMissing: true,
+                allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: 'prod',
@@ -101,21 +100,14 @@ pipeline {
                 reportName: 'Demo Deploy'
             ]
             
-            // Agregar notificación de calidad de SonarQube
-            script {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Calidad no aprobada: ${qg.status}"
-                }
-            }
-
+            // Notificación por email
             mail(
                 to: 'amartinezh@gmail.com',
                 subject: "Build Status: ${currentBuild.currentResult}",
                 body: "Job: ${env.JOB_NAME}\nEstado: ${currentBuild.currentResult}\nURL: ${env.BUILD_URL}"
             )
             
-            // Limpiar workspace
+            // Limpiar workspace al final
             cleanWs()
         }
     }
