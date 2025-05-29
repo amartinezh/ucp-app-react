@@ -103,12 +103,22 @@ pipeline {
         always {
             script {
                 node {
+                    sh '''
+                        echo "Contenido actual del workspace:"
+                        pwd
+                        ls -la
+                        echo "Contenido del directorio build/:"
+                        ls -la build || echo "No existe el directorio build/"
+                        echo "Contenido del directorio dist/:"
+                        ls -la dist || echo "No existe el directorio dist/"
+                    '''
+
                     // Publicar HTML
                     publishHTML target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: 'dist',
+                        reportDir: 'build',
                         reportFiles: 'index.html',
                         reportName: 'Demo Deploy'
                     ]
