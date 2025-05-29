@@ -21,18 +21,6 @@ pipeline {
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'npm run test:coverage'
-
-                sh '''
-                    echo "Verificando que react-scripts esté disponible:"
-                    npx react-scripts --version || echo "react-scripts no disponible"
-
-                    echo "Ejecutando build manual:"
-                    npm run build || echo "Falló el build"
-
-                    echo "Contenido del directorio después del build:"
-                    ls -la
-                '''
-
             }
         }
 
@@ -113,15 +101,6 @@ pipeline {
     }
     post {
         always {
-            sh '''
-                echo "Contenido actual del workspace:"
-                pwd
-                ls -la
-                echo "Contenido del directorio build/:"
-                ls -la build || echo "No existe el directorio build/"
-                echo "Contenido del directorio dist/:"
-                ls -la dist || echo "No existe el directorio dist/"
-            '''
 
             // Publicar HTML
             publishHTML target: [
