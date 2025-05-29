@@ -114,7 +114,7 @@ pipeline {
                         reportName: 'Demo Deploy'
                     ]
                     
-                    // Notificación por email
+                    // Notificación por email 
                     mail(
                         to: 'amartinezh@gmail.com',
                         subject: "Build Status: ${currentBuild.currentResult}",
