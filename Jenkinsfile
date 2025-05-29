@@ -2,11 +2,11 @@ pipeline {
     agent any
     tools {
         nodejs 'Node_24'  // Configurado en Global Tools
-        hudson.plugins.sonar.SonarRunnerInstallation 'SonarQubeScanner'
     }
     environment {
         SONAR_PROJECT_KEY = 'ucp-app-react'
         SONAR_PROJECT_NAME = 'UCP React App'
+        SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
     }
     stages {
         // Etapa 1: Checkout
