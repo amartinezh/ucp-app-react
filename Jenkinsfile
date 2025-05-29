@@ -102,25 +102,29 @@ pipeline {
     }
     post {
         always {
-            // Publicar HTML primero
-            publishHTML target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'build',
-                reportFiles: 'index.html',
-                reportName: 'Demo Deploy'
-            ]
-            
-            // Notificación por email
-            mail(
-                to: 'amartinezh@gmail.com',
-                subject: "Build Status: ${currentBuild.currentResult}",
-                body: "Job: ${env.JOB_NAME}\nEstado: ${currentBuild.currentResult}\nURL: ${env.BUILD_URL}"
-            )
-            
-            // Limpiar workspace al final
-            cleanWs()
+            script {
+                node {
+                    // Publicar HTML
+                    publishHTML target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'build',
+                        reportFiles: 'index.html',
+                        reportName: 'Demo Deploy'
+                    ]
+                    
+                    // Notificación por email
+                    mail(
+                        to: 'amartinezh@gmail.com',
+                        subject: "Build Status: ${currentBuild.currentResult}",
+                        body: "Job: ${env.JOB_NAME}\nEstado: ${currentBuild.currentResult}\nURL: ${env.BUILD_URL}"
+                    )
+                }
+                
+                // Limpiar workspace (esto puede quedarse fuera del node)
+                cleanWs()
+            }
         }
     }
 }
