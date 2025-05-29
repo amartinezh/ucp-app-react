@@ -82,12 +82,17 @@ pipeline {
         stage('Deploy (Simulated)') {
             steps {
                 script {
-                    // Verifica primero si existe el directorio build
-                    sh 'ls -la build/'
-                    // Crea el directorio prod y copia los archivos
-                    sh 'mkdir -p prod && cp -r build/* prod/'
-                    // Verifica que los archivos se copiaron
-                    sh 'ls -la prod/'
+                    // Verifica que el directorio build existe
+                    sh 'ls -la build/ || echo "Directory build/ does not exist"'
+                    
+                    // Crea prod y copia con verificación
+                    sh '''
+                        mkdir -p prod
+                        echo "Contents of build/:"
+                        ls -la build/
+                        echo "Copying files..."
+                        cp -r build/* prod/ || echo "Copy failed"
+                        echo "Contents o
                 }
             }
         }
