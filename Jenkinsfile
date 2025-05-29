@@ -83,15 +83,15 @@ pipeline {
             steps {
                 script {
                     // Verifica que el directorio build existe
-                    sh 'ls -la build/ || echo "Directory build/ does not exist"'
+                    sh 'ls -la dist/ || echo "Directory dist/ does not exist"'
             
                     // Crea prod y copia con verificación
                     sh '''
                         mkdir -p prod
-                        echo "Contents of build/:"
-                        ls -la build/
+                        echo "Contents of dist/:"
+                        ls -la dist/
                         echo "Copying files..."
-                        cp -r build/* prod/ || echo "Copy failed"
+                        cp -r dist/* prod/ || echo "Copy failed"
                         echo "Contents of prod/:"
                         ls -la prod/
                     '''
