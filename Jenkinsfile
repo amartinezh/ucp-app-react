@@ -106,7 +106,7 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'prod',
+                reportDir: 'build',
                 reportFiles: 'index.html',
                 reportName: 'Demo Deploy'
             ]
