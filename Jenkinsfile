@@ -6,7 +6,8 @@ pipeline {
     environment {
         SONAR_PROJECT_KEY = 'ucp-app-react'
         SONAR_PROJECT_NAME = 'UCP React App'
-        SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
+        SONAR_SCANNER_HOME = tool 'SonarQubeScanner',
+        SONAR_HOST_URL = 'http://sonarqube:9000'
     }
     stages {
         stage('Checkout') {
