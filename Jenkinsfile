@@ -82,8 +82,12 @@ pipeline {
         stage('Deploy (Simulated)') {
             steps {
                 script {
+                    // Verifica primero si existe el directorio build
+                    sh 'ls -la build/'
+                    // Crea el directorio prod y copia los archivos
                     sh 'mkdir -p prod && cp -r build/* prod/'
-                    echo "Simulated deploy successful! Files copied to /prod"
+                    // Verifica que los archivos se copiaron
+                    sh 'ls -la prod/'
                 }
             }
         }
